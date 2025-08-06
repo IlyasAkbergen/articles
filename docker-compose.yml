@@ -1,0 +1,55 @@
+services:
+  # NestJS Application
+  app:
+    image: node:18-alpine
+    container_name: articles-app
+    working_dir: /usr/src/app
+    ports:
+      - "3030:3000"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    env_file:
+      - .env
+    command: sh -c "npm install && npm run start:dev"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - articles-iliyas-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: articles-postgres
+    restart: unless-stopped
+    ports:
+      - "5440:5432"
+    environment:
+      POSTGRES_DB: articles
+      POSTGRES_USER: articles_user
+      POSTGRES_PASSWORD: articles_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - articles-iliyas-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: articles-redis
+    restart: unless-stopped
+    ports:
+      - "6399:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - articles-iliyas-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  articles-iliyas-network:
+    driver: bridge
