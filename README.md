@@ -5,7 +5,7 @@
 To set up the entire project with one command, run:
 
 ```bash
-make setup
+make
 ```
 
 This will:

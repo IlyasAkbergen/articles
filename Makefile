@@ -4,10 +4,14 @@ setup:
 	@echo "🚀 Setting up Articles REST API..."
 	@echo "📋 Copying environment file..."
 	@cp .env.example .env
-	@echo "🐳 Building and starting Docker containers..."
-	@docker-compose up --build -d
+	@echo "� Installing dependencies..."
+	@npm install
+	@echo "�🐳 Building and starting Docker containers..."
+	@docker compose up --build -d
 	@echo "⏳ Waiting for services to be ready..."
 	@sleep 3
+	@echo "🔄 Running database migrations..."
+	@docker compose exec app sh -c "npm run migration:run"
 	@echo "✅ Setup complete!"
 	@echo ""
 	@echo "📊 Service URLs:"
