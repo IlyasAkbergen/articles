@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, FindManyOptions } from 'typeorm';
 import { ArticleRepository } from '../../domain/repositories/article.repository';
 import { Article } from '../../domain/entities/article.entity';
 import { ArticleEntity } from './article.entity';
@@ -10,6 +10,7 @@ import { ArticleTitle } from '../../domain/value-objects/article-title.value-obj
 import { ArticleContent } from '../../domain/value-objects/article-content.value-object';
 import { FullName } from '../../../author/domain/value-objects/full-name.value-object';
 import { Email } from '../../../author/domain/value-objects/email.value-object';
+import { PaginationOptions, PaginationResult } from '../../domain/interfaces/pagination.interface';
 
 @Injectable()
 export class TypeOrmArticleRepository implements ArticleRepository {
@@ -57,6 +58,46 @@ export class TypeOrmArticleRepository implements ArticleRepository {
     return entities.map((entity) => this.mapToDomain(entity));
   }
 
+  async findAllPaginated(options: PaginationOptions): Promise<PaginationResult<Article>> {
+    const { page, limit, sortBy = 'createdAt', sortOrder = 'DESC', search, authorId, published } = options;
+
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.articleRepository
+      .createQueryBuilder('article')
+      .leftJoinAndSelect('article.author', 'author');
+
+    if (search) {
+      queryBuilder.andWhere(
+        '(article.title ILIKE :search OR article.content ILIKE :search)',
+        { search: `%${search}%` }
+      );
+    }
+
+    if (authorId) {
+      queryBuilder.andWhere('article.authorId = :authorId', { authorId });
+    }
+
+    if (published !== undefined) {
+      queryBuilder.andWhere('article.isPublished = :published', { published });
+    }
+
+    const orderColumn = this.mapSortColumn(sortBy);
+    queryBuilder.orderBy(orderColumn, sortOrder);
+    queryBuilder.skip(skip).take(limit);
+
+    const [entities, total] = await queryBuilder.getManyAndCount();
+
+    const articles = entities.map((entity) => this.mapToDomain(entity));
+
+    return {
+      data: articles,
+      total,
+      page,
+      limit,
+    };
+  }
+
   async findByAuthorId(authorId: string): Promise<Article[]> {
     const entities = await this.articleRepository.find({
       where: { authorId },
@@ -69,6 +110,17 @@ export class TypeOrmArticleRepository implements ArticleRepository {
 
   async delete(id: string): Promise<void> {
     await this.articleRepository.delete(id);
+  }
+
+  private mapSortColumn(sortBy: string): string {
+    const columnMap: Record<string, string> = {
+      createdAt: 'article.createdAt',
+      updatedAt: 'article.updatedAt',
+      title: 'article.title',
+      publishedAt: 'article.publishedAt',
+    };
+
+    return columnMap[sortBy] || 'article.createdAt';
   }
 
   private mapToEntity(article: Article): ArticleEntity {

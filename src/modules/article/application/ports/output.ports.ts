@@ -1,4 +1,5 @@
 import { Article } from '../../domain/entities/article.entity';
+import { PaginationResult } from '../../domain/interfaces/pagination.interface';
 
 export abstract class CreateArticleOutputPort {
   abstract presentSuccess(article: Article): Promise<void>;
@@ -28,6 +29,7 @@ export abstract class GetArticleOutputPort {
 
 export abstract class GetAllArticlesOutputPort {
   abstract presentSuccess(articles: Article[]): Promise<void>;
+  abstract presentSuccessPaginated(result: PaginationResult<Article>): Promise<void>;
   abstract presentServerError(message: string): Promise<void>;
 }
 

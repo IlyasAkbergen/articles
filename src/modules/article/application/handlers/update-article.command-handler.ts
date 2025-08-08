@@ -5,6 +5,7 @@ import { UpdateArticleOutputPort } from '../ports/output.ports';
 import { ArticleRepository } from '../../domain/repositories/article.repository';
 import { ArticleTitle } from '../../domain/value-objects/article-title.value-object';
 import { ArticleContent } from '../../domain/value-objects/article-content.value-object';
+import { ArticleCacheInvalidationService } from '../services/article-cache-invalidation.service';
 
 @Injectable()
 @CommandHandler(UpdateArticleCommand)
@@ -12,6 +13,7 @@ export class UpdateArticleCommandHandler implements ICommandHandler<UpdateArticl
   constructor(
     private readonly articleRepository: ArticleRepository,
     private readonly outputPort: UpdateArticleOutputPort,
+    private readonly cacheInvalidationService: ArticleCacheInvalidationService,
   ) {}
 
   async execute(command: UpdateArticleCommand): Promise<void> {
@@ -73,6 +75,12 @@ export class UpdateArticleCommandHandler implements ICommandHandler<UpdateArticl
 
       // Save the updated article
       const savedArticle = await this.articleRepository.save(updatedArticle);
+
+      // Invalidate cache after updating article
+      await this.cacheInvalidationService.invalidateOnArticleUpdate(
+        savedArticle.id,
+        savedArticle.author.id,
+      );
 
       await this.outputPort.presentSuccess(savedArticle);
     } catch (error) {

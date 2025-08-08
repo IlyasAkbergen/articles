@@ -4,6 +4,7 @@ import { Author } from '../../domain/entities/author.entity';
 import { AuthorRepository } from '../../domain/repositories/author.repository';
 import { FullName } from '../../domain/value-objects/full-name.value-object';
 import { Email } from '../../domain/value-objects/email.value-object';
+import { AuthorAlreadyExistsException } from '../../domain/exceptions/author.exceptions';
 
 @CommandHandler(CreateAuthorCommand)
 export class CreateAuthorCommandHandler implements ICommandHandler<CreateAuthorCommand> {
@@ -15,7 +16,7 @@ export class CreateAuthorCommandHandler implements ICommandHandler<CreateAuthorC
     // Check if author with this email already exists
     const existingAuthor = await this.authorRepository.findByEmail(email);
     if (existingAuthor) {
-      throw new Error('Author with this email already exists');
+      throw new AuthorAlreadyExistsException(email);
     }
 
     // Create value objects

@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, QueryFailedError } from 'typeorm';
 import { AuthorRepository } from '../../domain/repositories/author.repository';
 import { Author } from '../../domain/entities/author.entity';
 import { AuthorEntity } from './author.entity';
 import { FullName } from '../../domain/value-objects/full-name.value-object';
 import { Email } from '../../domain/value-objects/email.value-object';
+import { AuthorAlreadyExistsException } from '../../domain/exceptions/author.exceptions';
 
 @Injectable()
 export class TypeOrmAuthorRepository implements AuthorRepository {
@@ -15,10 +16,22 @@ export class TypeOrmAuthorRepository implements AuthorRepository {
   ) {}
 
   async save(author: Author): Promise<Author> {
-    const entity = this.mapToEntity(author);
-    const savedEntity = await this.authorRepository.save(entity);
+    try {
+      const entity = this.mapToEntity(author);
+      const savedEntity = await this.authorRepository.save(entity);
 
-    return this.mapToDomain(savedEntity);
+      return this.mapToDomain(savedEntity);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        // Handle PostgreSQL unique constraint violation
+        if (error.message.includes('duplicate key value violates unique constraint') && 
+            error.message.includes('email')) {
+          throw new AuthorAlreadyExistsException(author.email.toString());
+        }
+      }
+      
+      throw error;
+    }
   }
 
   async findById(id: string): Promise<Author | null> {

@@ -4,6 +4,7 @@ import { FullName } from '../../../author/domain/value-objects/full-name.value-o
 import { Email } from '../../../author/domain/value-objects/email.value-object';
 import { ArticleTitle } from '../value-objects/article-title.value-object';
 import { ArticleContent } from '../value-objects/article-content.value-object';
+import { ArticleAlreadyPublishedException, ArticleAlreadyUnpublishedException } from '../exceptions/article.exceptions';
 
 describe('Article Entity', () => {
   const validAuthor = Author.create(
@@ -64,7 +65,7 @@ describe('Article Entity', () => {
       expect(updatedArticle.content).toBe(article.content);
       expect(updatedArticle.author).toBe(article.author);
       expect(updatedArticle.updatedAt).not.toBe(article.updatedAt);
-      expect(updatedArticle).not.toBe(article); // Should be a new instance
+      expect(updatedArticle).not.toBe(article);
     });
 
     it('should return new instance with updated content', () => {
@@ -76,7 +77,7 @@ describe('Article Entity', () => {
       expect(updatedArticle.title).toBe(article.title);
       expect(updatedArticle.author).toBe(article.author);
       expect(updatedArticle.updatedAt).not.toBe(article.updatedAt);
-      expect(updatedArticle).not.toBe(article); // Should be a new instance
+      expect(updatedArticle).not.toBe(article);
     });
 
     it('should throw error when updating with empty title', () => {
@@ -108,15 +109,13 @@ describe('Article Entity', () => {
       expect(publishedArticle.publishedAt).toBeInstanceOf(Date);
       expect(publishedArticle.id).toBe(article.id);
       expect(publishedArticle.title).toBe(article.title);
-      expect(publishedArticle).not.toBe(article); // Should be a new instance
+      expect(publishedArticle).not.toBe(article);
     });
 
     it('should throw error when trying to publish already published article', () => {
       const publishedArticle = article.publish();
 
-      expect(() => publishedArticle.publish()).toThrow(
-        'Article is already published',
-      );
+      expect(() => publishedArticle.publish()).toThrow(ArticleAlreadyPublishedException);
     });
 
     it('should return new instance when unpublishing a published article', () => {
@@ -126,13 +125,11 @@ describe('Article Entity', () => {
       expect(unpublishedArticle.isPublished).toBe(false);
       expect(unpublishedArticle.publishedAt).toBeNull();
       expect(unpublishedArticle.id).toBe(article.id);
-      expect(unpublishedArticle).not.toBe(publishedArticle); // Should be a new instance
+      expect(unpublishedArticle).not.toBe(publishedArticle);
     });
 
     it('should throw error when trying to unpublish already unpublished article', () => {
-      expect(() => article.unpublish()).toThrow(
-        'Article is already unpublished',
-      );
+      expect(() => article.unpublish()).toThrow(ArticleAlreadyUnpublishedException);
     });
   });
 

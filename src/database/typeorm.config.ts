@@ -19,7 +19,7 @@ const AppDataSource = new DataSource({
   entities: [AuthorEntity, ArticleEntity, UserEntity],
   migrations: ['dist/database/migrations/*.js'],
   migrationsTableName: 'migrations',
-  synchronize: false, // Always false for production
+  synchronize: false,
   logging: configService.get('NODE_ENV') === 'development',
 });
 

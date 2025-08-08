@@ -1,9 +1,11 @@
+import { PaginationOptions } from '../../domain/interfaces/pagination.interface';
+
 export class GetArticleQuery {
   constructor(public readonly id: string) {}
 }
 
 export class GetAllArticlesQuery {
-  constructor() {}
+  constructor(public readonly paginationOptions?: PaginationOptions) {}
 }
 
 export class GetArticlesByAuthorQuery {

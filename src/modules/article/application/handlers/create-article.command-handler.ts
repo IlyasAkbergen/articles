@@ -7,6 +7,7 @@ import { AuthorRepository } from '../../../author/domain/repositories/author.rep
 import { Article } from '../../domain/entities/article.entity';
 import { ArticleTitle } from '../../domain/value-objects/article-title.value-object';
 import { ArticleContent } from '../../domain/value-objects/article-content.value-object';
+import { ArticleCacheInvalidationService } from '../services/article-cache-invalidation.service';
 
 @Injectable()
 @CommandHandler(CreateArticleCommand)
@@ -15,6 +16,7 @@ export class CreateArticleCommandHandler implements ICommandHandler<CreateArticl
     private readonly articleRepository: ArticleRepository,
     private readonly authorRepository: AuthorRepository,
     private readonly outputPort: CreateArticleOutputPort,
+    private readonly cacheInvalidationService: ArticleCacheInvalidationService,
   ) {}
 
   async execute(command: CreateArticleCommand): Promise<void> {
@@ -52,6 +54,9 @@ export class CreateArticleCommandHandler implements ICommandHandler<CreateArticl
       const article = Article.create(title!, content!, author);
 
       const savedArticle = await this.articleRepository.save(article);
+
+      // Invalidate cache after creating article
+      await this.cacheInvalidationService.invalidateOnArticleCreate(author.id);
 
       await this.outputPort.presentSuccess(savedArticle);
     } catch (error) {

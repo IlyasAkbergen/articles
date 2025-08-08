@@ -18,8 +18,22 @@ This will:
 **Note:** This project uses non-standard ports to avoid conflicts when a tester evaluates multiple candidates' implementations of the same project:
 
 - **API**: http://localhost:3030
+- **API Documentation (Swagger)**: http://localhost:3030/api-docs
 - **PostgreSQL**: localhost:5440 (instead of default 5432)
 - **Redis**: localhost:6399 (instead of default 6379)
+
+## Default Credentials
+
+For testing purposes, the application automatically creates fixture data with these credentials:
+
+**Admin User:**
+- Email: `admin@articles.com`
+- Password: `Admin123!`
+- Role: `admin`
+
+**Sample Author:**
+- Name: `Iliyas Akbergen`
+- Email: `iliyas.akbergen@gmail.com`
 
 ## Additional Commands
 
@@ -29,6 +43,7 @@ make logs      # View container logs
 make restart   # Restart all services
 make status    # Check service status
 make clean     # Remove containers and volumes
+make fixtures  # Run fixtures to seed data
 ```
 
 ## Manual Setup (Alternative)

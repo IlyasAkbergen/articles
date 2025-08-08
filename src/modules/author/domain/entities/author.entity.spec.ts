@@ -63,7 +63,7 @@ describe('Author', () => {
       expect(updatedAuthor.id).toBe(author.id);
       expect(updatedAuthor.email).toBe(author.email);
       expect(updatedAuthor.updatedAt).not.toBe(originalUpdatedAt);
-      expect(updatedAuthor).not.toBe(author); // Should be a new instance
+      expect(updatedAuthor).not.toBe(author);
     });
   });
 
@@ -80,7 +80,7 @@ describe('Author', () => {
       expect(updatedAuthor.id).toBe(author.id);
       expect(updatedAuthor.fullName).toBe(author.fullName);
       expect(updatedAuthor.updatedAt).not.toBe(originalUpdatedAt);
-      expect(updatedAuthor).not.toBe(author); // Should be a new instance
+      expect(updatedAuthor).not.toBe(author);
     });
 
     it('should throw error when new email is invalid', () => {

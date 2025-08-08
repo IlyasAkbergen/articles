@@ -9,11 +9,13 @@ import { Email } from '../../../author/domain/value-objects/email.value-object';
 import { Article } from '../../domain/entities/article.entity';
 import { ArticleTitle } from '../../domain/value-objects/article-title.value-object';
 import { ArticleContent } from '../../domain/value-objects/article-content.value-object';
+import { ArticleCacheInvalidationService } from '../services/article-cache-invalidation.service';
 
 describe('DeleteArticleCommandHandler', () => {
   let handler: DeleteArticleCommandHandler;
   let articleRepository: jest.Mocked<ArticleRepository>;
   let outputPort: jest.Mocked<DeleteArticleOutputPort>;
+  let cacheInvalidationService: jest.Mocked<ArticleCacheInvalidationService>;
   let mockAuthor: Author;
   let mockArticle: Article;
 
@@ -32,6 +34,15 @@ describe('DeleteArticleCommandHandler', () => {
       presentServerError: jest.fn(),
     };
 
+    const mockCacheInvalidationService = {
+      invalidateAllArticlesCaches: jest.fn(),
+      invalidateArticleCache: jest.fn(),
+      invalidateAuthorArticlesCache: jest.fn(),
+      invalidateOnArticleUpdate: jest.fn(),
+      invalidateOnArticleCreate: jest.fn(),
+      invalidateOnArticleDelete: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DeleteArticleCommandHandler,
@@ -43,12 +54,17 @@ describe('DeleteArticleCommandHandler', () => {
           provide: DeleteArticleOutputPort,
           useValue: mockOutputPort,
         },
+        {
+          provide: ArticleCacheInvalidationService,
+          useValue: mockCacheInvalidationService,
+        },
       ],
     }).compile();
 
     handler = module.get<DeleteArticleCommandHandler>(DeleteArticleCommandHandler);
     articleRepository = module.get(ArticleRepository);
     outputPort = module.get(DeleteArticleOutputPort);
+    cacheInvalidationService = module.get(ArticleCacheInvalidationService);
 
     // Create mock data
     mockAuthor = Author.create(

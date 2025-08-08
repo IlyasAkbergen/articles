@@ -9,12 +9,14 @@ import {
   PublishArticleOutputPort,
 } from '../../application/ports/output.ports';
 import { Article } from '../../domain/entities/article.entity';
+import { PaginationResult } from '../../domain/interfaces/pagination.interface';
 import {
   ArticleResponseDto,
   ArticleListResponseDto,
   ErrorResponseDto,
   SuccessResponseDto,
 } from '../dtos/response.dtos';
+import { PaginatedArticlesResponseDto, PaginationMetaDto } from '../dtos/pagination.dtos';
 
 abstract class BaseRestPresenter {
   protected response: Response;
@@ -148,6 +150,15 @@ export class GetAllArticlesRestPresenter extends BaseRestPresenter implements Ge
       articles: articles.map((article) => this.mapToResponseDto(article)),
       total: articles.length,
     };
+    this.sendResponse(200, responseDto);
+  }
+
+  async presentSuccessPaginated(result: PaginationResult<Article>): Promise<void> {
+    const meta = new PaginationMetaDto(result.page, result.limit, result.total);
+    const responseDto = new PaginatedArticlesResponseDto(
+      result.data.map((article) => this.mapToResponseDto(article)),
+      meta,
+    );
     this.sendResponse(200, responseDto);
   }
 

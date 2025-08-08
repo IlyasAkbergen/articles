@@ -130,17 +130,14 @@ describe('ArticlesController', () => {
 
   describe('createArticle', () => {
     it('should execute CreateArticleCommand with correct parameters', async () => {
-      // Arrange
       const dto: CreateArticleRequestDto = {
         title: 'Test Article',
         content: 'Test content',
         authorId: 'author-id',
       };
 
-      // Act
       await controller.createArticle(dto, { id: 'user-id' }, mockResponse as Response);
 
-      // Assert
       expect(createPresenter.setResponse).toHaveBeenCalledWith(mockResponse);
       expect(commandBus.execute).toHaveBeenCalledWith(
         new CreateArticleCommand(dto.title, dto.content, dto.authorId),
@@ -150,24 +147,21 @@ describe('ArticlesController', () => {
 
   describe('getAllArticles', () => {
     it('should execute GetAllArticlesQuery', async () => {
-      // Act
-      await controller.getAllArticles(mockResponse as Response);
+      const paginationDto = {};
 
-      // Assert
+      await controller.getAllArticles(paginationDto, mockResponse as Response);
+
       expect(getAllPresenter.setResponse).toHaveBeenCalledWith(mockResponse);
-      expect(queryBus.execute).toHaveBeenCalledWith(new GetAllArticlesQuery());
+      expect(queryBus.execute).toHaveBeenCalledWith(expect.any(GetAllArticlesQuery));
     });
   });
 
   describe('getArticle', () => {
     it('should execute GetArticleQuery with correct id', async () => {
-      // Arrange
       const articleId = 'article-id';
 
-      // Act
       await controller.getArticle(articleId, mockResponse as Response);
 
-      // Assert
       expect(getPresenter.setResponse).toHaveBeenCalledWith(mockResponse);
       expect(queryBus.execute).toHaveBeenCalledWith(new GetArticleQuery(articleId));
     });
@@ -175,13 +169,10 @@ describe('ArticlesController', () => {
 
   describe('getArticlesByAuthor', () => {
     it('should execute GetArticlesByAuthorQuery with correct authorId', async () => {
-      // Arrange
       const authorId = 'author-id';
 
-      // Act
       await controller.getArticlesByAuthor(authorId, mockResponse as Response);
 
-      // Assert
       expect(getAllPresenter.setResponse).toHaveBeenCalledWith(mockResponse);
       expect(queryBus.execute).toHaveBeenCalledWith(
         new GetArticlesByAuthorQuery(authorId),
@@ -191,17 +182,14 @@ describe('ArticlesController', () => {
 
   describe('updateArticle', () => {
     it('should execute UpdateArticleCommand with correct parameters', async () => {
-      // Arrange
       const articleId = 'article-id';
       const dto: UpdateArticleRequestDto = {
         title: 'Updated Title',
         content: 'Updated content',
       };
 
-      // Act
       await controller.updateArticle(articleId, dto, { id: 'user-id' }, mockResponse as Response);
 
-      // Assert
       expect(updatePresenter.setResponse).toHaveBeenCalledWith(mockResponse);
       expect(commandBus.execute).toHaveBeenCalledWith(
         new UpdateArticleCommand(articleId, dto.title, dto.content),
@@ -211,13 +199,10 @@ describe('ArticlesController', () => {
 
   describe('deleteArticle', () => {
     it('should execute DeleteArticleCommand with correct id', async () => {
-      // Arrange
       const articleId = 'article-id';
 
-      // Act
       await controller.deleteArticle(articleId, { id: 'user-id' }, mockResponse as Response);
 
-      // Assert
       expect(deletePresenter.setResponse).toHaveBeenCalledWith(mockResponse);
       expect(commandBus.execute).toHaveBeenCalledWith(
         new DeleteArticleCommand(articleId),
@@ -227,14 +212,11 @@ describe('ArticlesController', () => {
 
   describe('publishArticle', () => {
     it('should execute PublishArticleCommand with correct id', async () => {
-      // Arrange
       const articleId = 'article-id';
       const dto: PublishArticleRequestDto = {};
 
-      // Act
       await controller.publishArticle(articleId, dto, { id: 'user-id' }, mockResponse as Response);
 
-      // Assert
       expect(publishPresenter.setResponse).toHaveBeenCalledWith(mockResponse);
       expect(commandBus.execute).toHaveBeenCalledWith(
         new PublishArticleCommand(articleId),
@@ -244,13 +226,10 @@ describe('ArticlesController', () => {
 
   describe('unpublishArticle', () => {
     it('should execute UnpublishArticleCommand with correct id', async () => {
-      // Arrange
       const articleId = 'article-id';
 
-      // Act
       await controller.unpublishArticle(articleId, { id: 'user-id' }, mockResponse as Response);
 
-      // Assert
       expect(publishPresenter.setResponse).toHaveBeenCalledWith(mockResponse);
       expect(commandBus.execute).toHaveBeenCalledWith(
         new UnpublishArticleCommand(articleId),

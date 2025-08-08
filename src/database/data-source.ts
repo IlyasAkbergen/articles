@@ -16,6 +16,6 @@ export const AppDataSource = new DataSource({
   entities: ['src/modules/**/infrastructure/persistence/*.entity.ts'],
   migrations: ['src/database/migrations/*.ts'],
   migrationsTableName: 'migrations_history',
-  synchronize: false, // Always false in production and when using migrations
+  synchronize: false,
   logging: configService.get('NODE_ENV') === 'development',
 });

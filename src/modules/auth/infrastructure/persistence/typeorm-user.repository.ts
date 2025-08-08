@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, QueryFailedError } from 'typeorm';
 import { UserRepository } from '../../domain/repositories/user.repository';
 import { User } from '../../domain/entities/user.entity';
 import { UserEntity } from './user.entity';
 import { Email } from '../../domain/value-objects/email.value-object';
 import { Password } from '../../domain/value-objects/password.value-object';
 import { UserRole } from '../../domain/value-objects/user-role.value-object';
+import { UserAlreadyExistsException } from '../../domain/exceptions/user.exceptions';
 
 @Injectable()
 export class TypeOrmUserRepository implements UserRepository {
@@ -16,18 +17,30 @@ export class TypeOrmUserRepository implements UserRepository {
   ) {}
 
   async save(user: User): Promise<User> {
-    const userEntity = new UserEntity();
-    userEntity.id = user.id;
-    userEntity.email = user.email.toString();
-    userEntity.password = user.password.toString();
-    userEntity.role = user.role.toString();
-    userEntity.isEmailVerified = user.isEmailVerified;
-    userEntity.createdAt = user.createdAt;
-    userEntity.updatedAt = user.updatedAt;
+    try {
+      const userEntity = new UserEntity();
+      userEntity.id = user.id;
+      userEntity.email = user.email.toString();
+      userEntity.password = user.password.toString();
+      userEntity.role = user.role.toString();
+      userEntity.isEmailVerified = user.isEmailVerified;
+      userEntity.createdAt = user.createdAt;
+      userEntity.updatedAt = user.updatedAt;
 
-    const savedEntity = await this.userRepository.save(userEntity);
-    
-    return this.toDomain(savedEntity);
+      const savedEntity = await this.userRepository.save(userEntity);
+      
+      return this.toDomain(savedEntity);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        // Handle PostgreSQL unique constraint violation
+        if (error.message.includes('duplicate key value violates unique constraint') && 
+            error.message.includes('email')) {
+          throw new UserAlreadyExistsException(user.email.toString());
+        }
+      }
+      
+      throw error;
+    }
   }
 
   async findById(id: string): Promise<User | null> {

@@ -12,6 +12,7 @@ import { AuthorEntity } from './modules/author/infrastructure/persistence/author
 import { ArticleEntity } from './modules/article/infrastructure/persistence/article.entity';
 import { UserEntity } from './modules/auth/infrastructure/persistence/user.entity';
 import { JwtAuthGuard } from './modules/auth/infrastructure/guards/jwt-auth.guard';
+import { FixturesModule } from './fixtures/fixtures.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { JwtAuthGuard } from './modules/auth/infrastructure/guards/jwt-auth.guar
         password: configService.get('DATABASE_PASSWORD', 'articles_password'),
         database: configService.get('DATABASE_NAME', 'articles'),
         entities: [AuthorEntity, ArticleEntity, UserEntity],
-        synchronize: false, // Using migrations instead
+        synchronize: false,
+        autoLoadEntities: true,
         migrations: ['dist/database/migrations/*.js'],
         migrationsRun: configService.get('NODE_ENV') === 'production',
         logging: configService.get('NODE_ENV') === 'development',
@@ -39,6 +41,7 @@ import { JwtAuthGuard } from './modules/auth/infrastructure/guards/jwt-auth.guar
     AuthModule,
     AuthorsModule,
     ArticlesModule,
+    FixturesModule,
   ],
   controllers: [AppController],
   providers: [

@@ -2,6 +2,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { Author } from '../../../author/domain/entities/author.entity';
 import { ArticleTitle } from '../value-objects/article-title.value-object';
 import { ArticleContent } from '../value-objects/article-content.value-object';
+import { 
+  ArticleAlreadyPublishedException, 
+  ArticleAlreadyUnpublishedException 
+} from '../exceptions/article.exceptions';
 
 export class Article {
   private constructor(
@@ -75,7 +79,7 @@ export class Article {
 
   publish(): Article {
     if (this.isPublished) {
-      throw new Error('Article is already published');
+      throw new ArticleAlreadyPublishedException();
     }
 
     return new Article(
@@ -92,7 +96,7 @@ export class Article {
 
   unpublish(): Article {
     if (!this.isPublished) {
-      throw new Error('Article is already unpublished');
+      throw new ArticleAlreadyUnpublishedException();
     }
 
     return new Article(

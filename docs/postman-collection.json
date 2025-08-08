@@ -1,0 +1,495 @@
+{
+  "info": {
+    "name": "Articles API",
+    "description": "Complete API collection for the Articles API with authentication, article management, and author management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3030",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "articleId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "authorId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.status === 'Created') {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.userId) {",
+                  "        pm.collectionVariables.set('userId', response.data.userId);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"TestPassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register a new user account"
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"code\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify-otp",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "verify-otp"]
+            },
+            "description": "Verify email with OTP code"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.status === 'OK') {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.accessToken) {",
+                  "        pm.collectionVariables.set('accessToken', response.data.accessToken);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"TestPassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login and get access token"
+          }
+        },
+        {
+          "name": "Resend OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/resend-otp",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "resend-otp"]
+            },
+            "description": "Resend OTP to user email"
+          }
+        }
+      ],
+      "description": "Authentication endpoints for user registration, login, and OTP verification"
+    },
+    {
+      "name": "Authors",
+      "item": [
+        {
+          "name": "Create Author",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.status === 'Created') {",
+                  "    const response = pm.response.json();",
+                  "    if (response.id) {",
+                  "        pm.collectionVariables.set('authorId', response.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Iliyas\",\n  \"lastName\": \"Akbergen\",\n  \"email\": \"iliyas.akbergen@gmail.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/authors",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors"]
+            },
+            "description": "Create a new author (admin only)"
+          }
+        },
+        {
+          "name": "Get All Authors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/authors",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors"]
+            },
+            "description": "Retrieve all authors"
+          }
+        },
+        {
+          "name": "Get Author by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/authors/{{authorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors", "{{authorId}}"]
+            },
+            "description": "Get author by their unique ID"
+          }
+        },
+        {
+          "name": "Get Author by Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/authors/email/iliyas.akbergen@gmail.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors", "email", "iliyas.akbergen@gmail.com"]
+            },
+            "description": "Get author by their email address"
+          }
+        }
+      ],
+      "description": "Author management endpoints"
+    },
+    {
+      "name": "Articles",
+      "item": [
+        {
+          "name": "Create Article",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.status === 'Created') {",
+                  "    const response = pm.response.json();",
+                  "    if (response.id) {",
+                  "        pm.collectionVariables.set('articleId', response.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Understanding Clean Architecture in NestJS\",\n  \"content\": \"This article explores the principles of Clean Architecture and how to implement them in a NestJS application. Clean Architecture, introduced by Robert C. Martin, emphasizes the separation of concerns and dependency inversion...\",\n  \"authorId\": \"{{authorId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/articles",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles"]
+            },
+            "description": "Create a new article"
+          }
+        },
+        {
+          "name": "Get All Articles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/articles?page=1&limit=10&sortBy=createdAt&sortOrder=DESC",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "DESC"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "authorId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "published",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get all articles with pagination and filtering"
+          }
+        },
+        {
+          "name": "Get Article by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/articles/{{articleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "{{articleId}}"]
+            },
+            "description": "Get a specific article by ID"
+          }
+        },
+        {
+          "name": "Update Article",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Understanding Clean Architecture in NestJS - Updated\",\n  \"content\": \"This updated article explores the principles of Clean Architecture and how to implement them in a NestJS application with practical examples...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/articles/{{articleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "{{articleId}}"]
+            },
+            "description": "Update an existing article"
+          }
+        },
+        {
+          "name": "Publish Article",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Article is ready for publication\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/articles/{{articleId}}/publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "{{articleId}}", "publish"]
+            },
+            "description": "Publish an article"
+          }
+        },
+        {
+          "name": "Unpublish Article",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/articles/{{articleId}}/unpublish",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "{{articleId}}", "unpublish"]
+            },
+            "description": "Unpublish an article"
+          }
+        },
+        {
+          "name": "Get Articles by Author",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/articles/author/{{authorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "author", "{{authorId}}"]
+            },
+            "description": "Get all articles by a specific author"
+          }
+        },
+        {
+          "name": "Search Articles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/articles?search=clean architecture&published=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "clean architecture"
+                },
+                {
+                  "key": "published",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Search for articles by content and filter by publication status"
+          }
+        },
+        {
+          "name": "Delete Article",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/articles/{{articleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles", "{{articleId}}"]
+            },
+            "description": "Delete an article"
+          }
+        }
+      ],
+      "description": "Article management endpoints - CRUD operations, publish/unpublish, and search"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-set authorization header for protected endpoints",
+          "const url = pm.request.url.toString();",
+          "const publicEndpoints = ['/auth/register', '/auth/login', '/auth/verify-otp', '/auth/resend-otp'];",
+          "",
+          "let isPublicEndpoint = false;",
+          "publicEndpoints.forEach(endpoint => {",
+          "    if (url.includes(endpoint)) {",
+          "        isPublicEndpoint = true;",
+          "    }",
+          "});",
+          "",
+          "if (!isPublicEndpoint) {",
+          "    const accessToken = pm.collectionVariables.get('accessToken');",
+          "    if (accessToken) {",
+          "        pm.request.headers.add({",
+          "            key: 'Authorization',",
+          "            value: 'Bearer ' + accessToken",
+          "        });",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ]
+}

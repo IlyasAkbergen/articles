@@ -10,12 +10,14 @@ import { Email } from '../../../author/domain/value-objects/email.value-object';
 import { Article } from '../../domain/entities/article.entity';
 import { ArticleTitle } from '../../domain/value-objects/article-title.value-object';
 import { ArticleContent } from '../../domain/value-objects/article-content.value-object';
+import { ArticleCacheInvalidationService } from '../services/article-cache-invalidation.service';
 
 describe('CreateArticleCommandHandler', () => {
   let handler: CreateArticleCommandHandler;
   let articleRepository: jest.Mocked<ArticleRepository>;
   let authorRepository: jest.Mocked<AuthorRepository>;
   let outputPort: jest.Mocked<CreateArticleOutputPort>;
+  let cacheInvalidationService: jest.Mocked<ArticleCacheInvalidationService>;
   let mockAuthor: Author;
 
   beforeEach(async () => {
@@ -42,6 +44,15 @@ describe('CreateArticleCommandHandler', () => {
       presentServerError: jest.fn(),
     };
 
+    const mockCacheInvalidationService = {
+      invalidateAllArticlesCaches: jest.fn(),
+      invalidateArticleCache: jest.fn(),
+      invalidateAuthorArticlesCache: jest.fn(),
+      invalidateOnArticleUpdate: jest.fn(),
+      invalidateOnArticleCreate: jest.fn(),
+      invalidateOnArticleDelete: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateArticleCommandHandler,
@@ -57,6 +68,10 @@ describe('CreateArticleCommandHandler', () => {
           provide: CreateArticleOutputPort,
           useValue: mockOutputPort,
         },
+        {
+          provide: ArticleCacheInvalidationService,
+          useValue: mockCacheInvalidationService,
+        },
       ],
     }).compile();
 
@@ -64,8 +79,8 @@ describe('CreateArticleCommandHandler', () => {
     articleRepository = module.get(ArticleRepository);
     authorRepository = module.get(AuthorRepository);
     outputPort = module.get(CreateArticleOutputPort);
+    cacheInvalidationService = module.get(ArticleCacheInvalidationService);
 
-    // Create a mock author for testing
     mockAuthor = Author.create(
       new FullName({ firstName: 'Iliyas', lastName: 'Akbergen' }),
       new Email('iliyas.akbergen@gmail.com'),
@@ -77,7 +92,6 @@ describe('CreateArticleCommandHandler', () => {
   });
 
   it('should create article successfully', async () => {
-    // Arrange
     const command = new CreateArticleCommand(
       'Test Article Title',
       'This is test article content',
@@ -93,10 +107,8 @@ describe('CreateArticleCommandHandler', () => {
     authorRepository.findById.mockResolvedValue(mockAuthor);
     articleRepository.save.mockResolvedValue(mockArticle);
 
-    // Act
     await handler.execute(command);
 
-    // Assert
     expect(authorRepository.findById).toHaveBeenCalledWith(command.authorId);
     expect(articleRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -110,17 +122,14 @@ describe('CreateArticleCommandHandler', () => {
   });
 
   it('should present validation error for empty title', async () => {
-    // Arrange
     const command = new CreateArticleCommand(
       '',
       'This is test article content',
       mockAuthor.id,
     );
 
-    // Act
     await handler.execute(command);
 
-    // Assert
     expect(outputPort.presentValidationError).toHaveBeenCalledWith([
       'Title cannot be empty',
     ]);
@@ -128,17 +137,14 @@ describe('CreateArticleCommandHandler', () => {
   });
 
   it('should present validation error for empty content', async () => {
-    // Arrange
     const command = new CreateArticleCommand(
       'Test Article Title',
       '',
       mockAuthor.id,
     );
 
-    // Act
     await handler.execute(command);
 
-    // Assert
     expect(outputPort.presentValidationError).toHaveBeenCalledWith([
       'Content cannot be empty',
     ]);
@@ -146,7 +152,6 @@ describe('CreateArticleCommandHandler', () => {
   });
 
   it('should present not found error when author does not exist', async () => {
-    // Arrange
     const command = new CreateArticleCommand(
       'Test Article Title',
       'This is test article content',
@@ -155,17 +160,14 @@ describe('CreateArticleCommandHandler', () => {
 
     authorRepository.findById.mockResolvedValue(null);
 
-    // Act
     await handler.execute(command);
 
-    // Assert
     expect(authorRepository.findById).toHaveBeenCalledWith('non-existent-author-id');
     expect(outputPort.presentNotFoundError).toHaveBeenCalledWith('Author not found');
     expect(articleRepository.save).not.toHaveBeenCalled();
   });
 
   it('should present server error when repository throws', async () => {
-    // Arrange
     const command = new CreateArticleCommand(
       'Test Article Title',
       'This is test article content',
@@ -175,10 +177,8 @@ describe('CreateArticleCommandHandler', () => {
     authorRepository.findById.mockResolvedValue(mockAuthor);
     articleRepository.save.mockRejectedValue(new Error('Database error'));
 
-    // Act
     await handler.execute(command);
 
-    // Assert
     expect(outputPort.presentServerError).toHaveBeenCalledWith(
       'Failed to create article: Database error',
     );

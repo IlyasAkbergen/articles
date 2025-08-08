@@ -2,14 +2,11 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CqrsModule } from '@nestjs/cqrs';
 
-// Domain
 import { AuthorRepository } from './domain/repositories/author.repository';
 
-// Infrastructure
 import { AuthorEntity } from './infrastructure/persistence/author.entity';
 import { TypeOrmAuthorRepository } from './infrastructure/persistence/typeorm-author.repository';
 
-// Application
 import { 
   CreateAuthorCommandHandler,
   GetAllAuthorsQueryHandler,
@@ -17,7 +14,6 @@ import {
   GetAuthorByEmailQueryHandler
 } from './application/handlers';
 
-// Presentation
 import { AuthorsController } from './presentation/controllers/authors.controller';
 
 const CommandHandlers = [CreateAuthorCommandHandler];

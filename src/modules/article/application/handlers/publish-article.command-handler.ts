@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { PublishArticleCommand } from '../commands';
 import { PublishArticleOutputPort } from '../ports/output.ports';
 import { ArticleRepository } from '../../domain/repositories/article.repository';
+import { ArticleCacheInvalidationService } from '../services/article-cache-invalidation.service';
 
 @Injectable()
 @CommandHandler(PublishArticleCommand)
@@ -10,6 +11,7 @@ export class PublishArticleCommandHandler implements ICommandHandler<PublishArti
   constructor(
     private readonly articleRepository: ArticleRepository,
     private readonly outputPort: PublishArticleOutputPort,
+    private readonly cacheInvalidationService: ArticleCacheInvalidationService,
   ) {}
 
   async execute(command: PublishArticleCommand): Promise<void> {
@@ -26,6 +28,12 @@ export class PublishArticleCommandHandler implements ICommandHandler<PublishArti
       try {
         const publishedArticle = article.publish();
         const savedArticle = await this.articleRepository.save(publishedArticle);
+
+        // Invalidate cache after publishing article
+        await this.cacheInvalidationService.invalidateOnArticleUpdate(
+          savedArticle.id,
+          savedArticle.author.id,
+        );
 
         await this.outputPort.presentSuccess(savedArticle);
       } catch (domainError) {

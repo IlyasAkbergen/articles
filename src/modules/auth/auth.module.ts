@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { UserRepository } from './domain/repositories/user.repository';
 import { OtpRepository } from './domain/repositories/otp.repository';
+import { OtpService } from './application/services/otp.service';
 
 import {
   RegisterUserCommandHandler,
@@ -53,6 +54,7 @@ const CommandHandlers = [
     JwtStrategy,
     JwtAuthGuard,
     RolesGuard,
+    OtpService,
     {
       provide: UserRepository,
       useClass: TypeOrmUserRepository,

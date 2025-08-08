@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { AuthorsModule } from '../author/authors.module';
 
-// Domain
 import { ArticleRepository } from './domain/repositories/article.repository';
 
-// Application
 import {
   CreateArticleOutputPort,
   UpdateArticleOutputPort,
@@ -27,11 +26,13 @@ import {
   GetArticlesByAuthorQueryHandler,
 } from './application/handlers';
 
-// Infrastructure
+import { CacheService } from './application/services/cache.service';
+import { ArticleCacheInvalidationService } from './application/services/article-cache-invalidation.service';
+
 import { ArticleEntity } from './infrastructure/persistence/article.entity';
 import { TypeOrmArticleRepository } from './infrastructure/persistence/typeorm-article.repository';
+import { RedisCacheService } from './infrastructure/cache/redis-cache.service';
 
-// Presentation
 import { ArticlesController } from './presentation/controllers/articles.controller';
 import {
   CreateArticleRestPresenter,
@@ -68,18 +69,24 @@ const Presenters = [
 @Module({
   imports: [
     CqrsModule,
+    ConfigModule,
     TypeOrmModule.forFeature([ArticleEntity]),
     AuthorsModule,
   ],
   controllers: [ArticlesController],
   providers: [
-    // Repository implementations
     {
       provide: ArticleRepository,
       useClass: TypeOrmArticleRepository,
     },
     
-    // Output port implementations (presenters) - using existing instances
+    {
+      provide: CacheService,
+      useClass: RedisCacheService,
+    },
+    
+    ArticleCacheInvalidationService,
+    
     {
       provide: CreateArticleOutputPort,
       useExisting: CreateArticleRestPresenter,
@@ -105,11 +112,9 @@ const Presenters = [
       useExisting: PublishArticleRestPresenter,
     },
     
-    // Handlers
     ...CommandHandlers,
     ...QueryHandlers,
     
-    // Presenters for controller injection
     ...Presenters,
   ],
   exports: [ArticleRepository],
