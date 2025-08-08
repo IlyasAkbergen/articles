@@ -1,5 +1,4 @@
 services:
-  # NestJS Application
   app:
     image: node:20-alpine
     container_name: articles-app
@@ -20,7 +19,6 @@ services:
     networks:
       - articles-iliyas-network
 
-  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
     container_name: articles-postgres
@@ -36,7 +34,6 @@ services:
     networks:
       - articles-iliyas-network
 
-  # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: articles-redis

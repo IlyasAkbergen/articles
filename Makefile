@@ -9,9 +9,9 @@ setup:
 	@echo "�🐳 Building and starting Docker containers..."
 	@docker compose up --build -d
 	@echo "⏳ Waiting for services to be ready..."
-	@sleep 3
+	@sleep 5
 	@echo "🔄 Running database migrations..."
-	@docker compose exec app sh -c "npm run migration:run"
+	@docker compose exec app sh -c "npm install && npm run migration:run"
 	@echo "✅ Setup complete!"
 	@echo ""
 	@echo "📊 Service URLs:"

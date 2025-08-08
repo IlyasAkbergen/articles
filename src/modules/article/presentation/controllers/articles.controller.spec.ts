@@ -138,7 +138,7 @@ describe('ArticlesController', () => {
       };
 
       // Act
-      await controller.createArticle(dto, mockResponse as Response);
+      await controller.createArticle(dto, { id: 'user-id' }, mockResponse as Response);
 
       // Assert
       expect(createPresenter.setResponse).toHaveBeenCalledWith(mockResponse);
@@ -199,7 +199,7 @@ describe('ArticlesController', () => {
       };
 
       // Act
-      await controller.updateArticle(articleId, dto, mockResponse as Response);
+      await controller.updateArticle(articleId, dto, { id: 'user-id' }, mockResponse as Response);
 
       // Assert
       expect(updatePresenter.setResponse).toHaveBeenCalledWith(mockResponse);
@@ -215,7 +215,7 @@ describe('ArticlesController', () => {
       const articleId = 'article-id';
 
       // Act
-      await controller.deleteArticle(articleId, mockResponse as Response);
+      await controller.deleteArticle(articleId, { id: 'user-id' }, mockResponse as Response);
 
       // Assert
       expect(deletePresenter.setResponse).toHaveBeenCalledWith(mockResponse);
@@ -232,7 +232,7 @@ describe('ArticlesController', () => {
       const dto: PublishArticleRequestDto = {};
 
       // Act
-      await controller.publishArticle(articleId, dto, mockResponse as Response);
+      await controller.publishArticle(articleId, dto, { id: 'user-id' }, mockResponse as Response);
 
       // Assert
       expect(publishPresenter.setResponse).toHaveBeenCalledWith(mockResponse);
@@ -248,7 +248,7 @@ describe('ArticlesController', () => {
       const articleId = 'article-id';
 
       // Act
-      await controller.unpublishArticle(articleId, mockResponse as Response);
+      await controller.unpublishArticle(articleId, { id: 'user-id' }, mockResponse as Response);
 
       // Assert
       expect(publishPresenter.setResponse).toHaveBeenCalledWith(mockResponse);

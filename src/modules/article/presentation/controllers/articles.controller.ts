@@ -8,6 +8,7 @@ import {
   Body,
   ValidationPipe,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import type { Response } from 'express';
@@ -36,8 +37,13 @@ import {
   GetAllArticlesRestPresenter,
   PublishArticleRestPresenter,
 } from '../presenters/article-rest.presenter';
+import { Public } from '../../../auth/infrastructure/decorators/public.decorator';
+import { Roles } from '../../../auth/infrastructure/decorators/roles.decorator';
+import { RolesGuard } from '../../../auth/infrastructure/guards/roles.guard';
+import { CurrentUser } from '../../../auth/infrastructure/decorators/current-user.decorator';
 
 @Controller('articles')
+@UseGuards(RolesGuard)
 export class ArticlesController {
   constructor(
     private readonly commandBus: CommandBus,
@@ -51,8 +57,10 @@ export class ArticlesController {
   ) {}
 
   @Post()
+  @Roles('user', 'admin')
   async createArticle(
     @Body(ValidationPipe) createArticleDto: CreateArticleRequestDto,
+    @CurrentUser() user: any,
     @Res() response: Response,
   ): Promise<void> {
     this.createArticlePresenter.setResponse(response);
@@ -67,6 +75,7 @@ export class ArticlesController {
   }
 
   @Get()
+  @Roles('user', 'admin')
   async getAllArticles(@Res() response: Response): Promise<void> {
     this.getAllArticlesPresenter.setResponse(response);
 
@@ -86,6 +95,7 @@ export class ArticlesController {
   }
 
   @Get(':id')
+  @Roles('user', 'admin')
   async getArticle(
     @Param('id') id: string,
     @Res() response: Response,
@@ -98,6 +108,7 @@ export class ArticlesController {
   }
 
   @Get('author/:authorId')
+  @Roles('user', 'admin')
   async getArticlesByAuthor(
     @Param('authorId') authorId: string,
     @Res() response: Response,
@@ -110,9 +121,11 @@ export class ArticlesController {
   }
 
   @Put(':id')
+  @Roles('user', 'admin')
   async updateArticle(
     @Param('id') id: string,
     @Body(ValidationPipe) updateArticleDto: UpdateArticleRequestDto,
+    @CurrentUser() user: any,
     @Res() response: Response,
   ): Promise<void> {
     this.updateArticlePresenter.setResponse(response);
@@ -127,8 +140,10 @@ export class ArticlesController {
   }
 
   @Delete(':id')
+  @Roles('user', 'admin')
   async deleteArticle(
     @Param('id') id: string,
+    @CurrentUser() user: any,
     @Res() response: Response,
   ): Promise<void> {
     this.deleteArticlePresenter.setResponse(response);
@@ -139,9 +154,11 @@ export class ArticlesController {
   }
 
   @Post(':id/publish')
+  @Roles('user', 'admin')
   async publishArticle(
     @Param('id') id: string,
     @Body() publishArticleDto: PublishArticleRequestDto,
+    @CurrentUser() user: any,
     @Res() response: Response,
   ): Promise<void> {
     this.publishArticlePresenter.setResponse(response);
@@ -152,8 +169,10 @@ export class ArticlesController {
   }
 
   @Post(':id/unpublish')
+  @Roles('user', 'admin')
   async unpublishArticle(
     @Param('id') id: string,
+    @CurrentUser() user: any,
     @Res() response: Response,
   ): Promise<void> {
     this.publishArticlePresenter.setResponse(response);
