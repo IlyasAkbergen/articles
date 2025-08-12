@@ -33,7 +33,7 @@ For testing purposes, the application automatically creates fixture data with th
 
 **Sample Author:**
 - Name: `Iliyas Akbergen`
-- Email: `iliyas.akbergen@gmail.com`
+- Email: `iliyas@akbergen.info`
 
 ## Additional Commands
 
